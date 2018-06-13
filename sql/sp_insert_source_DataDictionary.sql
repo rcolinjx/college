@@ -20,12 +20,12 @@ CREATE	TABLE source_DataDictionary
 ;
 
 -- load from .csv
-LOAD DATA LOCAL INFILE "c:/users/administrator/desktop/dd.csv"
-INTO TABLE source_DataDictionary
-COLUMNS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n'
-IGNORE 1 LINES
+LOAD		DATA LOCAL INFILE 'C:/GitHub/college/Database/raw_files/dd.csv'
+INTO		TABLE source_DataDictionary
+COLUMNS	TERMINATED BY ','
+ENCLOSED	BY '"'
+LINES 	TERMINATED BY '\r\n'
+IGNORE	1 LINES
 ;
 
 UPDATE	source_DataDictionary
@@ -75,6 +75,7 @@ SET		a.DataDictionaryElementID = b.MaxElementValue
 
 DROP	TABLE IF EXISTS source_ScoreCard_fields
 ;
+
 CREATE	TABLE source_ScoreCard_fields
 		(
 			FieldId INT PRIMARY KEY AUTO_INCREMENT
@@ -208,34 +209,39 @@ VALUES	('UNITID')
 		,('C150_4_POOLED_SUPP')
 ;
 
-CREATE	TEMPORARY TABLE IF NOT EXISTS scoreCardFields(FieldName VARCHAR(255), DataType VARCHAR(255))
+DROP	TABLE IF EXISTS scoreCardFields
 ;
 
-TRUNCATE	TABLE scoreCardFields
+CREATE	TEMPORARY TABLE IF NOT EXISTS scoreCardFields(FieldName VARCHAR(255), DataType VARCHAR(255), IsIncluded BIT)
 ;
 
 INSERT	scoreCardFields
 SELECT	b.FieldName
 		,CASE	
 			WHEN ApiDataType = 'integer' AND NameOfDataElement LIKE 'Flag%' THEN 'BIT'
-			WHEN	ApiDataType = 'interger' THEN 'INT'
+			WHEN	ApiDataType = 'integer' THEN 'INT'
 			WHEN ApiDataType = 'float' THEN 'FLOAT(10,3)'
 			ELSE 'VARCHAR(255)'
 		END
+          ,CASE
+			WHEN DevCategory IN
+			(
+				'admissions'
+				,'aid'
+				,'cost'
+				,'earnings'
+				,'root'
+				,'school'
+				,'student'
+			)
+			THEN 1
+			ELSE 0
+		END IsIncluded
 FROM		source_DataDictionary a
 		JOIN
 		source_ScoreCard_fields b
 		ON	a.VariableName = b.FieldName
-WHERE	DevCategory IN
-		(
-			'admissions'
-			,'aid'
-			,'cost'
-			,'earnings'
-			,'root'
-			,'school'
-			,'student'
-		)
+WHERE	DeveloperFriendlyName IS NOT NULL
 ;
 
 DROP	TABLE IF EXISTS source_ScoreCard
@@ -250,6 +256,7 @@ SET	@createCommand =
 					,')'
 				) Statement
 		FROM		scoreCardFields a
+          WHERE	IsIncluded = 1
 	)
 ;
 PREPARE createCommand FROM @createCommand;
@@ -259,13 +266,13 @@ SET	@loadCommand =
 	(
 		SELECT	CONCAT
 				(
-					"LOAD DATA LOCAL INFILE 'c:/users/administrator/desktop/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES ("
+					"LOAD DATA LOCAL INFILE 'C:/GitHub/college/Database/raw_files/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES ("
 					,GROUP_CONCAT(FieldName SEPARATOR ',')
 					,");"
 				)
 		FROM		(
 					SELECT	CASE
-								WHEN FieldName IS NULL THEN '@dummy'
+								WHEN IsIncluded = 0 THEN '@dummy'
 								ELSE FieldName
 							END FieldName
 					FROM		scoreCardFields a
@@ -273,9 +280,9 @@ SET	@loadCommand =
 	)
 ;
 
-SELECT	@loadCommand;
+-- SELECT	@loadCommand;
 
-LOAD DATA LOCAL INFILE 'c:/users/administrator/desktop/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES (UNITID,OPEID,OPEID6,INSTNM,CITY,STABBR,INSTURL,NPCURL,HCM2,PREDDEG,HIGHDEG,CONTROL,LOCALE,HBCU,PBI,ANNHI,TRIBAL,AANAPII,HSI,NANTI,MENONLY,WOMENONLY,RELAFFIL,SATVR25,SATVR75,SATMT25,SATMT75,SATWR25,SATWR75,SATVRMID,SATMTMID,SATWRMID,ACTCM25,ACTCM75,ACTEN25,ACTEN75,ACTMT25,ACTMT75,ACTWR25,ACTWR75,ACTCMMID,ACTENMID,ACTMTMID,ACTWRMID,SAT_AVG,SAT_AVG_ALL,DISTANCEONLY,UGDS,UGDS_WHITE,UGDS_BLACK,UGDS_HISP,UGDS_ASIAN,UGDS_AIAN,UGDS_NHPI,UGDS_2MOR,UGDS_NRA,UGDS_UNKN,PPTUG_EF,CURROPER,NPT4_PUB,NPT4_PRIV,NPT41_PUB,NPT42_PUB,NPT43_PUB,NPT44_PUB,NPT45_PUB,NPT41_PRIV,NPT42_PRIV,NPT43_PRIV,NPT44_PRIV,NPT45_PRIV,PCTPELL,PCTFLOAN,UG25ABV,MD_EARN_WNE_P10,GT_25K_P6,GRAD_DEBT_MDN_SUPP,GRAD_DEBT_MDN10YR_SUPP,RET_FT4_POOLED_SUPP,RET_FTL4_POOLED_SUPP,RET_PT4_POOLED_SUPP,RET_PTL4_POOLED_SUPP)
+LOAD DATA LOCAL INFILE 'C:/GitHub/college/Database/raw_files/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES (UNITID,OPEID,OPEID6,INSTNM,CITY,STABBR,INSTURL,NPCURL,HCM2,PREDDEG,HIGHDEG,CONTROL,LOCALE,HBCU,PBI,ANNHI,TRIBAL,AANAPII,HSI,NANTI,MENONLY,WOMENONLY,RELAFFIL,SATVR25,SATVR75,SATMT25,SATMT75,SATWR25,SATWR75,SATVRMID,SATMTMID,SATWRMID,ACTCM25,ACTCM75,ACTEN25,ACTEN75,ACTMT25,ACTMT75,ACTWR25,ACTWR75,ACTCMMID,ACTENMID,ACTMTMID,ACTWRMID,SAT_AVG,SAT_AVG_ALL,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,@dummy,DISTANCEONLY,UGDS,UGDS_WHITE,UGDS_BLACK,UGDS_HISP,UGDS_ASIAN,UGDS_AIAN,UGDS_NHPI,UGDS_2MOR,UGDS_NRA,UGDS_UNKN,PPTUG_EF,CURROPER,NPT4_PUB,NPT4_PRIV,NPT41_PUB,NPT42_PUB,NPT43_PUB,NPT44_PUB,NPT45_PUB,NPT41_PRIV,NPT42_PRIV,NPT43_PRIV,NPT44_PRIV,NPT45_PRIV,PCTPELL,PCTFLOAN,UG25ABV,MD_EARN_WNE_P10,GT_25K_P6,GRAD_DEBT_MDN_SUPP,GRAD_DEBT_MDN10YR_SUPP,@dummy,@dummy,@dummy,RET_FT4_POOLED_SUPP,RET_FTL4_POOLED_SUPP,RET_PT4_POOLED_SUPP,RET_PTL4_POOLED_SUPP)
 ;
 
 select count(*) from source_DataDictionary; -- 2059
@@ -283,9 +290,6 @@ select count(*) from source_ScoreCard; -- 7593
 
 select * from source_DataDictionary;
 select * from source_ScoreCard;
-
-select FieldName, NameOfDataElement from scoreCardFields join source_DataDictionary on VariableName = FieldName;
-
 
 
 /*
@@ -337,7 +341,7 @@ SET	@insertCommand =
 	(
 		SELECT	CONCAT
 				(
-					"LOAD DATA LOCAL INFILE 'c:/users/administrator/desktop/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES ("
+					"LOAD DATA LOCAL INFILE 'C:/GitHub/college/Database/raw_files/dd.csv/sc.csv' INTO TABLE source_ScoreCard COLUMNS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES ("
 					,GROUP_CONCAT(Field SEPARATOR ',')
 					,");"
 				)
