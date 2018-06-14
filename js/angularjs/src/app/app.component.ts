@@ -1,64 +1,88 @@
 import { Component } from '@angular/core';
+import { HttpClientModule, HttpClient } from "@angular/common/http";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
 export class AppComponent {
+  constructor(private http: HttpClient) { }
+
   title = 'College Bound';
-  states = [ {value:"AL",name:"Alabama"},
-    {value:"AK",name:"Alaska"},
-    {value:"AZ",name:"Arizona"},
-    {value:"AR",name:"Arkansas"},
-    {value:"CA",name:"California"},
-    {value:"CO",name:"Colorado"},
-    {value:"CT",name:"Connecticut"},
-    {value:"DE",name:"Delaware"},
-    {value:"DC",name:"District Of Columbia"},
-    {value:"FL",name:"Florida"},
-    {value:"GA",name:"Georgia"},
-    {value:"HI",name:"Hawaii"},
-    {value:"ID",name:"Idaho"},
-    {value:"IL",name:"Illinois"},
-    {value:"IN",name:"Indiana"},
-    {value:"IA",name:"Iowa"},
-    {value:"KS",name:"Kansas"},
-    {value:"KY",name:"Kentucky"},
-    {value:"LA",name:"Louisiana"},
-    {value:"ME",name:"Maine"},
-    {value:"MD",name:"Maryland"},
-    {value:"MA",name:"Massachusetts"},
-    {value:"MI",name:"Michigan"},
-    {value:"MN",name:"Minnesota"},
-    {value:"MS",name:"Mississippi"},
-    {value:"MO",name:"Missouri"},
-    {value:"MT",name:"Montana"},
-    {value:"NE",name:"Nebraska"},
-    {value:"NV",name:"Nevada"},
-    {value:"NH",name:"New Hampshire"},
-    {value:"NJ",name:"New Jersey"},
-    {value:"NM",name:"New Mexico"},
-    {value:"NY",name:"New York"},
-    {value:"NC",name:"North Carolina"},
-    {value:"ND",name:"North Dakota"},
-    {value:"OH",name:"Ohio"},
-    {value:"OK",name:"Oklahoma"},
-    {value:"OR",name:"Oregon"},
-    {value:"PA",name:"Pennsylvania"},
-    {value:"RI",name:"Rhode Island"},
-    {value:"SC",name:"South Carolina"},
-    {value:"SD",name:"South Dakota"},
-    {value:"TN",name:"Tennessee"},
-    {value:"TX",name:"Texas"},
-    {value:"UT",name:"Utah"},
-    {value:"VT",name:"Vermont"},
-    {value:"VA",name:"Virginia"},
-    {value:"WA",name:"Washington"},
-    {value:"WV",name:"West Virginia"},
-    {value:"WI",name:"Wisconsin"},
-    {value:"WY",name:"Wyoming"},
-  ];
   min = 1;
   max = 100000;
+  selected_states = ['AL'];
+
+  onSelect(proopertyName) {
+    console.log(this[proopertyName]);
+  }
+
+  onClick(){
+    console.log("Clicked!");
+    this.http.get('http://localhost:80/filter', {
+      headers: ['Access-Control-Allow-Origin'],
+      params: {
+        'states': JSON.stringify(this.selected_states),
+        'min': this.min,
+        'max': this.max
+      }
+    })
+      .subscribe();
+  }
+
+  states = [
+    {value:"'AL'",label:'Alabama'},
+    {value:"'AK'",label:'Alaska'},
+    {value:"'AZ'",label:'Arizona'},
+    {value:"'AR'",label:'Arkansas'},
+    {value:"'CA'",label:'California'},
+    {value:"'CO'",label:'Colorado'},
+    {value:"'CT'",label:'Connecticut'},
+    {value:"'DE'",label:'Delaware'},
+    {value:"'DC'",label:'District Of Columbia'},
+    {value:"'FL'",label:'Florida'},
+    {value:"'GA'",label:'Georgia'},
+    {value:"'HI'",label:'Hawaii'},
+    {value:"'ID'",label:'Idaho'},
+    {value:"'IL'",label:'Illinois'},
+    {value:"'IN'",label:'Indiana'},
+    {value:"'IA'",label:'Iowa'},
+    {value:"'KS'",label:'Kansas'},
+    {value:"'KY'",label:'Kentucky'},
+    {value:"'LA'",label:'Louisiana'},
+    {value:"'ME'",label:'Maine'},
+    {value:"'MD'",label:'Maryland'},
+    {value:"'MA'",label:'Massachusetts'},
+    {value:"'MI'",label:'Michigan'},
+    {value:"'MN'",label:'Minnesota'},
+    {value:"'MS'",label:'Mississippi'},
+    {value:"'MO'",label:'Missouri'},
+    {value:"'MT'",label:'Montana'},
+    {value:"'NE'",label:'Nebraska'},
+    {value:"'NV'",label:'Nevada'},
+    {value:"'NH'",label:'New Hampshire'},
+    {value:"'NJ'",label:'New Jersey'},
+    {value:"'NM'",label:'New Mexico'},
+    {value:"'NY'",label:'New York'},
+    {value:"'NC'",label:'North Carolina'},
+    {value:"'ND'",label:'North Dakota'},
+    {value:"'OH'",label:'Ohio'},
+    {value:"'OK'",label:'Oklahoma'},
+    {value:"'OR'",label:'Oregon'},
+    {value:"'PA'",label:'Pennsylvania'},
+    {value:"'RI'",label:'Rhode Island'},
+    {value:"'SC'",label:'South Carolina'},
+    {value:"'SD'",label:'South Dakota'},
+    {value:"'TN'",label:'Tennessee'},
+    {value:"'TX'",label:'Texas'},
+    {value:"'UT'",label:'Utah'},
+    {value:"'VT'",label:'Vermont'},
+    {value:"'VA'",label:'Virginia'},
+    {value:"'WA'",label:'Washington'},
+    {value:"'WV'",label:'West Virginia'},
+    {value:"'WI'",label:'Wisconsin'},
+    {value:"'WY'",label:'Wyoming'},
+  ];
 }
